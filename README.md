@@ -1,5 +1,5 @@
 # Netflix_data_analysis
-Performed exploratory data analysis and found latest trends related to Netflix.
+Performed exploratory data analysis and found latest trends related to Netflix. Packages used in this project are Highcharter,dplyr and ggplot2.
 
 Some of the questions I tried to answer are:-
 
