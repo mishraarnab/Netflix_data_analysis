@@ -1,0 +1,180 @@
+---
+title: "Netflix Data Analysis"
+author: "Arnab Mishra"
+date: "23/05/2020"
+output: html_document
+---
+# Introduction
+
+In this project I will try to find out intresting trends related to netflix and how netflix is getting popular in India day-by-day.
+
+First we will install and load all the packages needed for this project.
+
+We will perform exploratory data analysis using dplyr package and plot our insights using highcharter package. Atlast I will use ggplot2 to plot a graph and analyze few trends using it.
+```{r,message=FALSE,warning=FALSE}
+library(dplyr)
+library(highcharter)
+library(ggplot2)
+
+```
+## Top Genres across Netflix
+First we will read our data. The data consits of 6234 rows and 12 colomns.
+
+```{r,message=FALSE,warning=FALSE}
+
+netflixdata<-read.csv("C:/Users/Arnab Mishra/Desktop/Netflix/netflix_titles.csv")
+
+Genre<- netflixdata %>%
+  group_by(listed_in) %>% 
+  summarise(Count = n()) %>% 
+  arrange(desc(Count)) %>% 
+  top_n(20)
+
+hchart(Genre,hcaes(x=listed_in,y=Count),type="column",color="#CC0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="Barplot of top 20 genres produced on Netflix",align="center") %>%
+  hc_add_theme(hc_theme_elementary()) 
+```
+We can clearly observe that most of the Netflix contents are Documentaries followed by Stand-up Comedy.
+
+## Top countries producing Netflix content
+
+We can observe that most Netflix shows are from United states followed by India.
+```{r,message=FALSE,warning=FALSE}
+country_data<- netflixdata %>%
+  group_by(country) %>% 
+  summarise(Count = n()) %>% 
+  arrange(desc(Count)) %>% 
+  top_n(10)
+
+hchart(country_data,hcaes(x=country,y=Count),type="column",color="#CC0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="Barplot of top 10 countries producing shows/movies on Netflix",align="center") %>%
+  hc_add_theme(hc_theme_elementary()) 
+```
+
+
+## TV Shows vs Movies
+
+We can clearly observe from the barplot that most of the content on Netflix is a Movie. Approximately 3/4 of the Netflix content are Movies.
+```{r,message=FALSE,warning=FALSE}
+type_of_content<- netflixdata %>%
+  group_by(type) %>% 
+  summarise(Count = n()) 
+
+hchart(type_of_content,hcaes(x=type,y=Count),type="column",color="#CC0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="Barplot of comparison between number of TV shows and movies on netflix",align="center") %>%
+  hc_add_theme(hc_theme_elementary(backgroundcolor="#333333"))
+```
+
+## Increse of Netflix market in India over the years
+
+We can observe that Netflix has grown over the years in India and will keep up the speed in the coming years. Here I have not included the 2020 values as it is not the total values which can change. So I have taken the values upto 2019. It can be also noted that in 102 movies/tv series having release year 2017 are uploaded in Netfllix which is the highest.
+
+```{r,message=FALSE,warning=FALSE}
+countrydf<- netflixdata%>% 
+  select(listed_in,country,release_year) %>% 
+  group_by(listed_in, country) %>% 
+  mutate(nCount = n())
+
+India_trends <- countrydf%>% 
+  filter(country=="India"& release_year != "2020" & release_year>"1990" ) %>% 
+  group_by(release_year) %>% 
+  summarise(nCount = n()) 
+
+ggplot(India_trends,aes(x=release_year,y=nCount,color=release_year))+geom_line()+theme_bw()+geom_point()
+````
+
+### Netflix in India before 2010
+We can clearly observe that before 2010 number of movies were dominating the number of TV shows in India ie.onl 1 Tv show having release year before 2010.
+```{r,message=FALSE,warning=FALSE}
+indian_content1<-netflixdata %>%
+  filter(country=="India" & release_year <"2010")  %>%
+  group_by(type) %>%
+  summarise(Count=n())
+
+hchart(indian_content1,hcaes(x=type,y=Count),type="column",color="#cc0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="count of movies and tv shows in india before 2010 ",align="center") %>%
+  hc_add_theme(hc_theme_elementary()) 
+
+```
+
+But as we entered into early 2010 the number of TV shows released increased significantly.
+
+```{r,message=FALSE,warning=FALSE}
+indian_content2<-netflixdata %>%
+  filter(country=="India" & release_year >= "2010")  %>%
+  group_by(type) %>%
+  summarise(Count=n())
+
+hchart(indian_content2,hcaes(x=type,y=Count),type="column",color="#cc0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="count of movies and tv shows in india after 2010 ",align="center") %>%
+  hc_add_theme(hc_theme_elementary()) 
+
+```
+
+Recently Netfilx has analyzed the huge market in India and has started investing in Indian Content. We can observe that out of 52 TV shows released after 2010 about 28 are after 2017.
+
+```{r,message=FALSE,warning=FALSE}
+
+indian_content3<-netflixdata %>%
+  filter(country=="India" & release_year >= "2017")  %>%
+  group_by(type) %>%
+  summarise(Count=n())
+
+hchart(indian_content3,hcaes(x=type,y=Count),type="column",color="#cc0000",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="count of movies and tv shows in india after 2017 ",align="center") %>%
+  hc_add_theme(hc_theme_elementary()) 
+
+
+```
+
+## Top Genres in India
+Using the Highcharter package we can plot the graph between different genres and analyze which one is popular in India. We can observe that Dramas and International movies has the biggest share in Indian market and can expect similar type of content getting released in the following years.
+
+```{r,message=FALSE,warning=FALSE}
+countrydf<- netflixdata%>% 
+  select(listed_in,country,release_year) %>% 
+  group_by(listed_in, country) %>% 
+  mutate(nCount = n())
+
+India_shows <- countrydf  %>% 
+  filter(country=="India") %>% 
+  group_by(listed_in) %>% 
+  summarise(nCount = n()) %>% 
+  arrange(desc(nCount)) %>%
+  top_n(10)
+
+hchart(India_shows,hcaes(x=listed_in,y=nCount),type="column",color="#FF6633",name="Count") %>% 
+  hc_exporting(enabled = TRUE) %>%
+  hc_title(text="Top Genres of shows produced in India ",align="center") %>%
+  hc_add_theme(hc_theme_elementary())
+
+```
+
+## Netflix around the world
+Atlast we will try to understand how Netflix has grown over the years using ggplot2 package.
+
+```{r,message=FALSE,warning=FALSE}
+
+world<-netflixdata%>%
+  filter(release_year >"1990")%>%
+  select(release_year) %>% 
+  group_by(release_year) %>% 
+  mutate(nCount = n())
+  
+World_trends <- world  %>% 
+  filter(release_year != "2020")%>%
+  group_by(release_year) %>% 
+  summarise(nCount = n())
+
+ggplot(World_trends,aes(x=release_year,y=nCount,colour=release_year))+geom_line()+theme_bw()+geom_point()
+  
+
+```
+
+
